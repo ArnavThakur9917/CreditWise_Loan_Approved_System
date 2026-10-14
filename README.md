@@ -1,143 +1,84 @@
-# CreditWise Loan System
-### Machine Learning-based loan approval prediction — portfolio project
+# CreditWise — Loan Approval Prediction System
 
-CreditWise is a demonstration project for predicting whether a loan application resembles historically **Approved** or **Rejected** applications. It uses a scikit-learn classification pipeline, a FastAPI backend, and a Streamlit frontend.
-
-> **Important:** This is an educational prototype, not a real credit-decision system. Predictions can reflect historical bias and data quality problems. Do not use it to approve/deny real applicants. A real deployment requires legal/compliance review, fairness testing, explainability, security, monitoring, and human oversight.
+A full-stack machine-learning demo with a Flask backend and responsive dark-blue frontend inspired by the clean layout of sentiment-analysis demos. It predicts a likely loan outcome using a Random Forest pipeline trained on the included dataset.
 
 ## Features
-- Data cleaning and preprocessing (missing values, categorical encoding, numerical imputation)
-- Random Forest classifier with a held-out test split
-- Model evaluation metrics printed during training
-- FastAPI REST API (`/health`, `/predict`)
-- Streamlit form for entering applicant details and viewing a prediction
-- Clear setup steps for Windows PowerShell
+- Responsive form for 18 applicant features
+- Random Forest classification with numeric imputation and categorical one-hot encoding
+- Prediction result and estimated approval probability
+- Held-out test accuracy shown after training
+- Flask health endpoint at `/health`
 
 ## Project structure
 ```text
-CreditWise_Loan_System/
-├── backend/
-│   └── main.py
-├── frontend/
-│   └── app.py
-├── data/
-│   └── loan_data.csv
-├── models/                  # trained model is generated here
+CreditWise_loan_approved/
+├── app.py
 ├── train_model.py
 ├── requirements.txt
-├── .gitignore
-└── README.md
+├── README.md
+├── data/
+│   └── loan_data.csv
+├── models/                 # model generated after training
+├── templates/
+│   └── index.html
+└── static/
+    └── style.css
 ```
 
-## Dataset
-`data/loan_data.csv` is the dataset supplied for this project. It contains applicant attributes and the `Loan_Approved` target. The training script removes fully empty rows, drops `Applicant_ID` because it is an identifier rather than a meaningful predictor, and trains on the remaining rows.
-
-## 1. Requirements
-- Python 3.10–3.12 recommended
-- Git (only needed for GitHub upload)
-- Internet access for installing Python packages
-
-## 2. Setup on Windows (PowerShell)
-Open PowerShell in the project folder:
+## Run in VS Code (Windows PowerShell)
+Open this folder in VS Code, then run these commands in the terminal:
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+python train_model.py
+python app.py
 ```
 
-If PowerShell blocks activation, run this once in the current terminal:
+If PowerShell blocks virtual-environment activation, use this for the current terminal only:
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\.venv\Scripts\Activate.ps1
 ```
 
-If Python 3.12 is not installed, install Python 3.11 or 3.12 and use its launcher version instead.
+Then open **http://127.0.0.1:5000** in your browser. Keep the terminal running while you use the website. To stop the server, press `Ctrl+C`.
 
-## 3. Train the model
-Run from the project root:
+## Important notes
+- Train the model before starting the web app. Training creates `models/loan_approval_pipeline.joblib`.
+- The dataset and its labels determine what the model learns. Test accuracy is not a guarantee of real-world performance.
+- This is an educational demo, not a real lending decision system. Do not use it to make actual credit decisions or submit sensitive personal information.
+- The form shows the supported numeric ranges and categories from the included dataset. These are demo bounds, not lending rules.
 
-```powershell
-python train_model.py
-```
-
-This creates `models/loan_approval_pipeline.joblib` and prints accuracy, a classification report, and a confusion matrix. Review these metrics; accuracy alone is not sufficient for evaluating a loan model.
-
-## 4. Start the backend API
-Open **Terminal 1** in VS Code, from the project root, with the virtual environment active:
-
-```powershell
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-API docs: open `http://127.0.0.1:8000/docs` in your browser. Health check: `http://127.0.0.1:8000/health`.
-
-## 5. Start the frontend
-Open **Terminal 2**, activate the same environment, and run:
-
-```powershell
-streamlit run frontend/app.py
-```
-
-The Streamlit page should open in your browser. Keep the backend terminal running while using the frontend.
-
-If the API is hosted somewhere else, set the `CREDITWISE_API_URL` environment variable to the API base URL. For local development, the default is `http://127.0.0.1:8000`.
-
-## API example
-`POST /predict` JSON body:
-```json
-{
-  "Applicant_Income": 25000,
-  "Coapplicant_Income": 5000,
-  "Employment_Status": "Salaried",
-  "Age": 30,
-  "Marital_Status": "Single",
-  "Dependents": 0,
-  "Credit_Score": 720,
-  "Existing_Loans": 1,
-  "DTI_Ratio": 0.25,
-  "Savings": 50000,
-  "Collateral_Value": 100000,
-  "Loan_Amount": 150000,
-  "Loan_Term": 120,
-  "Loan_Purpose": "Home",
-  "Property_Area": "Urban",
-  "Education_Level": "Graduate",
-  "Gender": "Male",
-  "Employer_Category": "Private"
-}
-```
-
-## Push to GitHub
-1. Create a new **empty** GitHub repository named `CreditWise-Loan-System`.
-2. Extract this ZIP and open a terminal in the extracted folder.
-3. Run:
+## GitHub upload
+Create a new empty repository on GitHub, then from this project folder run:
 ```powershell
 git init
 git add .
-git commit -m "Build CreditWise loan prediction app"
+git commit -m "Build CreditWise loan approval prediction app"
 git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/CreditWise-Loan-System.git
+git remote add origin https://github.com/YOUR-USERNAME/CreditWise_loan_approved.git
 git push -u origin main
 ```
-Replace `YOUR-USERNAME` with your GitHub username. Do not upload `.venv/` or private applicant data. The included CSV is the dataset supplied for this educational project; verify that you have permission to publish it before pushing publicly.
-
-## Suggested GitHub repository description
-`An educational ML loan-approval prediction system with a scikit-learn pipeline, FastAPI backend, and Streamlit frontend.`
+Replace `YOUR-USERNAME` with your GitHub username. If Git says a remote already exists, inspect it with `git remote -v` before changing it.
 
 ## Suggested LinkedIn post
-I’ve built **CreditWise Loan System**, a machine-learning project that predicts loan approval outcomes from applicant and financial attributes.
 
-**What I worked on**
-- Data cleaning and preprocessing
-- Categorical encoding and missing-value handling
-- Training and evaluating a Random Forest classifier
-- Building a REST API with FastAPI
-- Creating an interactive Streamlit frontend
+🚀 **Project: CreditWise — Loan Approval Prediction System**
 
-This project helped me practice the end-to-end ML workflow, from preparing data to serving model predictions through an application.
+I built a full-stack machine-learning web application that estimates loan approval outcomes from applicant and financial details.
 
-Note: This is an educational prototype, not a real financial decision system.
+**What I used:**
+- Python, Pandas, Scikit-learn
+- Random Forest classification
+- Data preprocessing with imputation and one-hot encoding
+- Flask backend and responsive HTML/CSS frontend
 
-#MachineLearning #Python #FastAPI #Streamlit #DataScience #AI
+The app accepts applicant information through a web form and returns a model prediction with an estimated approval probability. I also included a training script and evaluation metrics to make the workflow reproducible.
+
+This project helped me practice the end-to-end ML workflow—from preparing data and training a model to integrating it into a web application.
+
+*Note: This is an educational project; predictions are not financial advice or official loan decisions.*
+
+#MachineLearning #Python #Flask #ScikitLearn #AI #WebDevelopment #NIT Srinagar
