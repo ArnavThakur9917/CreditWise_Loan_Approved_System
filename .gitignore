@@ -1,17 +1,7 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
 .venv/
 venv/
+__pycache__/
+*.py[cod]
 .env
-.pytest_cache/
-
-# Model artifacts (generated locally)
-models/*.joblib
-
-# Editor / OS
 .vscode/
-.idea/
 .DS_Store
-Thumbs.db
