@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10182d">
+
+    <title>CreditWise | Loan Approval Predictor</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<main class="page-shell">
+
+    <!-- Navigation Bar -->
+    <nav class="topbar">
+
+        <a class="brand" href="/">
+            <span class="brand-mark">C</span>
+            CreditWise
+        </a>
+
+        <span class="model-status">
+            <i></i>
+
+            ML MODEL
+
+            {% if model_ready %}
+                READY
+            {% else %}
+                NOT TRAINED
+            {% endif %}
+        </span>
+
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+
+        <div class="eyebrow">
+            <span></span>
+            SMART LENDING · MACHINE LEARNING
+        </div>
+
+        <h1>
+            Loan Approval<br>
+            <span>Prediction System</span>
+        </h1>
+
+        <p>
+            Enter the applicant's details and let the trained
+            machine-learning model estimate the loan outcome.
+        </p>
+
+        <div class="hero-tags">
+            <span>Random Forest</span>
+            <span>Scikit-learn</span>
+            <span>Instant prediction</span>
+        </div>
+
+    </section>
+
+
+    <!-- Prediction Result -->
+    {% if result %}
+
+    <section
+        class="result-card {{ 'approved' if result.approved else 'rejected' }}"
+        aria-live="polite">
+
+        <div class="result-icon">
+            {{ '✓' if result.approved else '!' }}
+        </div>
+
+        <div class="result-copy">
+
+            <span class="result-kicker">
+                MODEL PREDICTION
+            </span>
+
+            <h2>
+                {{ 'Likely to be Approved'
+                   if result.approved
+                   else 'Likely to be Rejected' }}
+            </h2>
+
+            <p>
+                This is a model estimate, not an official lending decision.
+            </p>
+
+        </div>
+
+        <div class="result-score">
+
+            <strong>{{ result.confidence }}%</strong>
+
+            <span>approval probability</span>
+
+        </div>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- Error Message -->
+    {% if error %}
+
+    <div class="alert" role="alert">
+        {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    <!-- Applicant Form -->
+    <form
+        method="POST"
+        action="/"
+        class="form-card"
+        id="loanForm"
+        autocomplete="off">
+
+        <!-- Form Heading -->
+        <div class="form-heading">
+
+            <div>
+
+                <span class="section-number">
+                    01 / APPLICANT PROFILE
+                </span>
+
+                <h2>Tell us about the applicant</h2>
+
+                <p>
+                    Review the default values or enter the applicant's
+                    actual information for an ML-based prediction.
+                </p>
+
+            </div>
+
+            <span class="required-note">
+                * Required fields
+            </span>
+
+        </div>
+
+
+        <!-- Input Fields -->
+        <div class="field-grid">
+
+            <!-- Numerical Fields -->
+            {% for name, label, minimum, maximum, default, step in numeric_fields %}
+
+            <label class="field">
+
+                <span>
+                    {{ label }} <b>*</b>
+                </span>
+
+                <input
+                    type="number"
+                    name="{{ name }}"
+                    id="{{ name }}"
+                    step="{{ step }}"
+                    min="{{ minimum }}"
+                    max="{{ maximum }}"
+                    value="{{ values.get(name, default) if values else default }}"
+                    placeholder="Enter {{ label|lower }}"
+                    autocomplete="off"
+                    required>
+
+                <small>
+                    Default: {{ default }}.
+                    You can change this value.
+                </small>
+
+            </label>
+
+            {% endfor %}
+
+
+            <!-- Categorical Fields -->
+            {% for name, label, options in categorical_fields %}
+
+            <label class="field">
+
+                <span>
+                    {{ label }} <b>*</b>
+                </span>
+
+                <select
+                    name="{{ name }}"
+                    id="{{ name }}"
+                    required>
+
+                    <option
+                        value=""
+                        disabled
+                        {% if not values or not values.get(name) %}
+                            selected
+                        {% endif %}>
+                        Select {{ label }}
+                    </option>
+
+                    {% for option in options %}
+
+                    <option
+                        value="{{ option }}"
+                        {% if values and values.get(name) == option %}
+                            selected
+                        {% endif %}>
+                        {{ option }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <small>
+                    Select the option matching the applicant.
+                </small>
+
+            </label>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- Form Footer -->
+        <div class="form-footer">
+
+            <p>
+                <span class="lock">▣</span>
+                Predictions are generated using the configured ML model.
+            </p>
+
+            <div class="buttons">
+
+                <!-- Reset Button -->
+                <button
+                    type="button"
+                    class="clear-btn"
+                    id="resetButton">
+
+                    Reset to defaults
+
+                </button>
+
+                <!-- Prediction Button -->
+                <button type="submit">
+                    Predict loan outcome
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+    <!-- Information Cards -->
+    <section class="bottom-grid">
+
+        <div class="info-tile">
+
+            <span class="tile-icon">✦</span>
+
+            <div>
+
+                <h3>Model-powered insight</h3>
+
+                <p>
+                    Uses a trained Random Forest pipeline with preprocessing.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="info-tile">
+
+            <span class="tile-icon">▥</span>
+
+            <div>
+
+                <h3>Evaluation metric</h3>
+
+                <p>
+
+                    {% if accuracy is not none %}
+
+                        Held-out test accuracy:
+                        <strong>{{ accuracy }}%</strong>
+
+                    {% else %}
+
+                        Train the model to show its test accuracy.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+    <footer>
+
+        CreditWise · Educational machine-learning project
+
+        <span>Not financial advice</span>
+
+    </footer>
+
+</main>
+
+
+<!-- Reset Form to Default Values -->
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("loanForm");
+    const resetButton = document.getElementById("resetButton");
+
+    if (!form || !resetButton) {
+        return;
+    }
+
+    resetButton.addEventListener("click", function () {
+
+        // Restore the original HTML values.
+        form.reset();
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
